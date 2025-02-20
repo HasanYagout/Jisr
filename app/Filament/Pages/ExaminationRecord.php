@@ -41,9 +41,11 @@ class ExaminationRecord extends Page implements HasForms
 
         $this->examination = $this->patient->examination;
         $medicalHistory = json_decode($this->patient->medical_history, true) ?? [];
-
-        // Extract only the checkbox values, excluding 'medical_history_others'
         $selectedMedicalHistory = array_keys(array_filter($medicalHistory, fn($key) => $key !== 'medical_history_others', ARRAY_FILTER_USE_KEY));
+
+        $problemSatisfactionPatient = json_decode($this->patient->examination->problem_satisfaction_patient, true) ?? [];
+        $problemSatisfactionDentist = json_decode($this->patient->examination->problem_satisfaction_dentist, true) ?? [];
+
         $this->form->fill([
             'name' => $this->patient->name,
             'age' => $this->patient->age,
@@ -57,6 +59,10 @@ class ExaminationRecord extends Page implements HasForms
             'complaint' => $this->patient->complaint,
             'dental_history' => $this->patient->dental_history,
             'dental_history_file' => $this->patient->dental_history_file,
+            'last_extraction' => $this->patient->examination->last_extraction,
+            'problem_satisfaction_patient' => $problemSatisfactionPatient,
+            'problem_satisfaction_dentist' => $problemSatisfactionDentist,
+
         ]);
     }    public function form(Form $form): Form
     {
@@ -249,8 +255,8 @@ class ExaminationRecord extends Page implements HasForms
 
         $this->examination->update([
             'last_extraction' => $data['last_extraction'] ?? null, // Set to null if empty
-            'problem_satisfaction_patient' => isset($data['problem_satisfaction_patient']) ? json_encode($data['problem_satisfaction_patient']) : null, // Encode only if not empty
-            'problem_satisfaction_dentist' => isset($data['problem_satisfaction_dentist']) ? json_encode($data['problem_satisfaction_dentist']) : null, // Encode only if not empty
+            'problem_satisfaction_patient' => isset($data['problem_satisfaction_patient']) ? json_encode($data['problem_satisfaction_patient']) : null,
+            'problem_satisfaction_dentist' => isset($data['problem_satisfaction_dentist']) ? json_encode($data['problem_satisfaction_dentist']) : null,
             'face_form' => $data['face_form'] ?? null, // Set to null if empty
             'facial_profile' => $data['facial_profile'] ?? null, // Set to null if empty
             'facial_complexion' => $data['facial_complexion'] ?? null, // Set to null if empty
