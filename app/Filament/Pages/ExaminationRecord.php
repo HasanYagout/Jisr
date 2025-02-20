@@ -7,6 +7,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -82,23 +83,6 @@ class ExaminationRecord extends Page implements HasForms
             'mobile' => 'Mobile',
         ];
 
-        // Define teeth diagram
-        $teethDiagram = [
-            // Upper Teeth (16 teeth)
-            'upper' => [
-                '1' => ['label' => 'Upper Right 3rd Molar', 'position' => 'upper_1'],
-                '2' => ['label' => 'Upper Right 2nd Molar', 'position' => 'upper_2'],
-                '3' => ['label' => 'Upper Right 1st Molar', 'position' => 'upper_3'],
-                // Add all 16 upper teeth...
-            ],
-            // Lower Teeth (16 teeth)
-            'lower' => [
-                '1' => ['label' => 'Lower Right 3rd Molar', 'position' => 'lower_1'],
-                '2' => ['label' => 'Lower Right 2nd Molar', 'position' => 'lower_2'],
-                '3' => ['label' => 'Lower Right 1st Molar', 'position' => 'lower_3'],
-                // Add all 16 lower teeth...
-            ],
-        ];
 
         return $form
             ->schema([
@@ -220,43 +204,7 @@ class ExaminationRecord extends Page implements HasForms
                     // Step 4: Intra-Examination
                     Wizard\Step::make('Intra-Examination')
                         ->schema([
-                            // Upper Teeth
-                            Placeholder::make('upper_teeth_label')
-                                ->label('Upper Teeth')
-                                ->columnSpanFull(),
-                            Grid::make(8) // 8 teeth per row (adjust as needed)
-                            ->schema(
-                                array_map(
-                                    fn ($tooth) => Select::make($tooth['position'])
-                                        ->label($tooth['label'])
-                                        ->options([
-                                            'missing' => 'Missing',
-                                            'decay' => 'Decay',
-                                            'crown' => 'Crown',
-                                            'mobile' => 'Mobile',
-                                        ]),
-                                    $teethDiagram['upper']
-                                )
-                            ),
-
-                            // Lower Teeth
-                            Placeholder::make('lower_teeth_label')
-                                ->label('Lower Teeth')
-                                ->columnSpanFull(),
-                            Grid::make(8) // 8 teeth per row (adjust as needed)
-                            ->schema(
-                                array_map(
-                                    fn ($tooth) => Select::make($tooth['position'])
-                                        ->label($tooth['label'])
-                                        ->options([
-                                            'missing' => 'Missing',
-                                            'decay' => 'Decay',
-                                            'crown' => 'Crown',
-                                            'mobile' => 'Mobile',
-                                        ]),
-                                    $teethDiagram['lower']
-                                )
-                            ),
+                         Repeater::make('da')
                         ]),
                 ])
                     ->skippable()
