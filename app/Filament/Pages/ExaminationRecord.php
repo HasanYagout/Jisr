@@ -40,30 +40,16 @@ class ExaminationRecord extends Page implements HasForms
         $this->patient = Patient::with('examination')->findOrFail($patientId);
 
         $this->examination = $this->patient->examination;
-
-        // Decode the medical_history JSON
         $medicalHistory = json_decode($this->patient->medical_history, true) ?? [];
 
-        // Define default structure for medical_history
-        $defaultMedicalHistory = [
-            'cardiac_disease' => null,
-            'hypertension' => null,
-            'diabetes' => null,
-            'others' => null,
-        ];
-
-        // Merge input JSON with default structure
-        $medicalHistory = array_merge($defaultMedicalHistory, $medicalHistory);
-
-        // Fill the form with the patient's data
+        // Extract only the checkbox values, excluding 'medical_history_others'
+        $selectedMedicalHistory = array_keys(array_filter($medicalHistory, fn($key) => $key !== 'medical_history_others', ARRAY_FILTER_USE_KEY));
         $this->form->fill([
             'name' => $this->patient->name,
             'age' => $this->patient->age,
             'phone' => $this->patient->phone,
-            'medical_history' => array_keys(array_filter($medicalHistory, function ($value, $key) {
-                return $value === 'Yes' && in_array($key, ['cardiac_disease', 'hypertension', 'diabetes']);
-            }, ARRAY_FILTER_USE_BOTH)),
-            'medical_history_others' => $medicalHistory['others'] ?? '',
+            'medical_history' => $selectedMedicalHistory,
+            'medical_history_others' => $medicalHistory['medical_history_others'] ?? '',
             'occupation' => $this->patient->occupation,
             'address' => $this->patient->address,
             'gender' => $this->patient->gender,
@@ -72,8 +58,7 @@ class ExaminationRecord extends Page implements HasForms
             'dental_history' => $this->patient->dental_history,
             'dental_history_file' => $this->patient->dental_history_file,
         ]);
-    }
-    public function form(Form $form): Form
+    }    public function form(Form $form): Form
     {
         // Define tooth status options
         $toothStatusOptions = [
@@ -113,25 +98,11 @@ class ExaminationRecord extends Page implements HasForms
                                     'hypertension' => 'Hypertension',
                                     'diabetes' => 'Diabetes',
                                 ])
-                                ->default(function () {
-                                    // Decode the JSON data
-                                    $medicalHistory = json_decode($this->patient->medical_history, true);
+                               ,
 
-                                    // Map "Yes" values to selected options
-                                    return array_keys(array_filter($medicalHistory, function ($value, $key) {
-                                        return $value === 'Yes' && in_array($key, ['cardiac_disease', 'hypertension', 'diabetes']);
-                                    }, ARRAY_FILTER_USE_BOTH));
-                                }),
 
                             TextInput::make('medical_history_others')
-                                ->label('Others')
-                                ->default(function () {
-                                    // Decode the JSON data
-                                    $medicalHistory = json_decode($this->patient->medical_history, true);
-
-                                    // Get the "others" field
-                                    return $medicalHistory['others'] ?? '';
-                                }),
+                                ->label('Others'),
                             TextArea::make('complaint')
                                 ->columnSpan(2),
                             TextArea::make('dental_history')
@@ -203,8 +174,40 @@ class ExaminationRecord extends Page implements HasForms
 
                     // Step 4: Intra-Examination
                     Wizard\Step::make('Intra-Examination')
+                        ->label('Intra-Examination')
                         ->schema([
-                         Repeater::make('da')
+                            Repeater::make('teeth')
+                                ->columnSpan(2)
+                                ->label('Intra-Examination Details')
+                                ->grid(2)
+                                ->schema([
+                                    Grid::make(2)
+                                        ->schema([
+                                            TextInput::make('tooth_number')
+                                                ->label('Tooth Number')
+                                                ->columnSpan(1)
+                                                ->required(),
+                                            Select::make('condition')
+                                                ->label('Condition')
+                                                ->columnSpan(1)
+                                                ->options([
+                                                    'caries' => 'Caries',
+                                                    'missing' => 'Missing',
+                                                    'filled' => 'Filled',
+                                                    'fractured' => 'Fractured',
+                                                    'healthy' => 'Healthy',
+                                                ])
+                                                ->required(),
+                                            Textarea::make('notes')
+                                                ->label('Notes')
+                                                ->columnSpan(2)
+                                                ->placeholder('Additional notes for this tooth...')
+                                                ->rows(5),
+                                        ]),
+                                ])
+                                ->columns(1)
+                                ->createItemButtonLabel('Add Tooth')
+                                ->default([]),
                         ]),
                 ])
                     ->skippable()
@@ -220,14 +223,17 @@ class ExaminationRecord extends Page implements HasForms
     public function submit(): void
     {
         $data = $this->form->getState();
+        $medicalHistory = $data['medical_history'];
+        $medicalHistoryOthers = $data['medical_history_others'];
 
-//        dd($data);
-        $currentMedicalHistory = json_decode($this->patient->medical_history, true) ?? [];
+        $medicalData = array_merge(
+            array_combine($medicalHistory, $medicalHistory),
+            array('medical_history_others' => $medicalHistoryOthers)
+        );
 
-// Merge the current medical_history with the new medical_history data
-        $updatedMedicalHistory = array_merge($currentMedicalHistory, $data['medical_history'] ?? []);
+// Encode the array into JSON
+        $updatedMedicalHistory = json_encode($medicalData);
 
-// Update the patient record
         $this->patient->update([
             'name' => $data['name'] ?? $this->patient->name,
             'age' => $data['age'] ?? $this->patient->age,
@@ -235,7 +241,7 @@ class ExaminationRecord extends Page implements HasForms
             'occupation' => $data['occupation'] ?? $this->patient->occupation,
             'address' => $data['address'] ?? $this->patient->address,
             'gender' => $data['gender'] ?? $this->patient->gender,
-            'medical_history' => json_encode($updatedMedicalHistory), // Updated medical_history
+            'medical_history' => $updatedMedicalHistory,
             'complaint' => $data['complaint'] ?? $this->patient->complaint,
             'dental_history' => $data['dental_history'] ?? $this->patient->dental_history,
             'pain_level' => $data['pain_level'] ?? $this->patient->pain_level,
