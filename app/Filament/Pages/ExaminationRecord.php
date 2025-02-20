@@ -498,53 +498,20 @@ class ExaminationRecord extends Page implements HasForms
                                         ->schema([
                                             TextInput::make('basic_information_grade')
                                                 ->numeric()
-                                                ->disabled(function ($get) {
-                                                    // Check if all required fields in Basic Information are filled
-                                                    $requiredFields = ['name', 'age', 'phone', 'occupation', 'address', 'gender', 'medical_history', 'complaint', 'dental_history', 'pain_level'];
-                                                    foreach ($requiredFields as $field) {
-                                                        if (empty($get($field))) {
-                                                            return true; // Disable if any required field is empty
-                                                        }
-                                                    }
-                                                    return false; // Enable if all required fields are filled
-                                                }),
+                                                ->disabled(fn($get) => !$this->areBasicInfoFieldsFilled($get)),
                                             TextInput::make('dental_history_grade')
                                                 ->numeric()
-                                                ->disabled(function ($get) {
-                                                    // Check if all required fields in Dental History are filled
-                                                    $requiredFields = ['last_extraction', 'problem_satisfaction_patient', 'problem_satisfaction_dentist'];
-                                                    foreach ($requiredFields as $field) {
-                                                        if (empty($get($field))) {
-                                                            return true; // Disable if any required field is empty
-                                                        }
-                                                    }
-                                                    return false; // Enable if all required fields are filled
-                                                }),
+                                                ->disabled(fn($get) => !$this->areDentalHistoryFieldsFilled($get)),
+
                                             TextInput::make('extra_examination_grade')
                                                 ->numeric()
-                                                ->disabled(function ($get) {
-                                                    // Check if all required fields in Extra-Examination are filled
-                                                    $requiredFields = ['face_form', 'facial_profile', 'facial_complexion', 'tmj'];
-                                                    foreach ($requiredFields as $field) {
-                                                        if (empty($get($field))) {
-                                                            return true; // Disable if any required field is empty
-                                                        }
-                                                    }
-                                                    return false; // Enable if all required fields are filled
-                                                }),
+                                                ->disabled(fn($get) => !$this->areExtraExaminationFieldsFilled($get)),
+
                                             TextInput::make('intra_examination_grade')
                                                 ->numeric()
-                                                ->disabled(function ($get) {
-                                                    // Check if all required fields in Intra-Examination are filled
-                                                    $requiredFields = ['soft_tissue_upper', 'soft_tissue_lower', 'soft_tissue_period', 'treatment_plan', 'diagnosis_classes', 'teeth'];
-                                                    foreach ($requiredFields as $field) {
-                                                        if (empty($get($field))) {
-                                                            return true; // Disable if any required field is empty
-                                                        }
-                                                    }
-                                                    return false; // Enable if all required fields are filled
-                                                }),
+                                                ->disabled(fn($get) => !$this->areIntraExaminationFieldsFilled($get)),
                                         ]),
+
 
                                 ]),
                         ])
@@ -560,7 +527,58 @@ class ExaminationRecord extends Page implements HasForms
             ])
             ->statePath('data');
     }
+    private function areBasicInfoFieldsFilled($get): bool
+    {
+        $requiredFields = ['name', 'age', 'phone', 'occupation', 'address', 'gender', 'medical_history', 'complaint', 'dental_history', 'pain_level'];
 
+        foreach ($requiredFields as $field) {
+            if (empty($get($field))) {
+                return false; // Return false if any required field is empty
+            }
+        }
+
+        // Check if at least one medical history checkbox is selected (excluding 'others')
+        $medicalHistory = $get('medical_history') ?? [];
+        $validMedicalHistory = array_diff($medicalHistory, ['others']); // Remove 'others' from the array
+
+        if (empty($validMedicalHistory)) {
+            return false; // Return false if no valid checkboxes are selected
+        }
+
+        return true; // All fields are filled and valid
+    }
+    private function areDentalHistoryFieldsFilled($get): bool
+    {
+        $requiredFields = ['last_extraction', 'problem_satisfaction_patient', 'problem_satisfaction_dentist'];
+        foreach ($requiredFields as $field) {
+            if (empty($get($field))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function areExtraExaminationFieldsFilled($get): bool
+    {
+        $requiredFields = ['face_form', 'facial_profile', 'facial_complexion', 'tmj'];
+        foreach ($requiredFields as $field) {
+            if (empty($get($field))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private function areIntraExaminationFieldsFilled($get): bool
+    {
+        $requiredFields = ['soft_tissue_upper', 'soft_tissue_lower', 'soft_tissue_period', 'treatment_plan', 'diagnosis_classes', 'teeth'];
+        foreach ($requiredFields as $field) {
+            if (empty($get($field))) {
+                return false;
+            }
+        }
+        return true;
+    }
     public function submit(): void
     {
         $data = $this->form->getState();

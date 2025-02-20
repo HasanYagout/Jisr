@@ -31,6 +31,19 @@ class AdminPanelProvider extends PanelProvider
             ->login(CustomLogin::class)
             ->colors([
                 'primary' => Color::Indigo,
+                'gray' => [
+                    50 => '249, 250, 251',
+                    100 => '243, 244, 246',
+                    200 => '229, 231, 235',
+                    300 => '209, 213, 219',
+                    400 => '156, 163, 175',
+                    500 => '107, 114, 128',
+                    600 => '75, 85, 99',
+                    700 => '55, 65, 81',
+                    800 => '31, 41, 55',
+                    900 => '17, 24, 39',
+                    950 => '3, 7, 18',
+                ],
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

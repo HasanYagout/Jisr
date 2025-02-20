@@ -34,6 +34,15 @@ class User extends Authenticatable
     {
         return $this->hasOne(Student::class, 'user_id');
     }
+    public function instructor()
+    {
+        return $this->hasOne(Instructor::class, 'user_id');
+    }
+    const Type=[
+        1=>'student',
+        2=>'admin',
+        3=>'instructor',
+    ];
 
     protected $hidden = [
         'password',
