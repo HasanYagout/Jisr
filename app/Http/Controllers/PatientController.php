@@ -12,31 +12,37 @@ class PatientController extends Controller
     public function store(Request $request)
     {
         try {
-            // Validate the form data
-            $validatedData = $request->validate([
-                'name' => 'required|string',
-                'age' => 'required|numeric',
+            // Define validation rules
+            $rules = [
+                'name' => 'required|string|max:255',
+                'age' => 'required|integer|min:0|max:120',
                 'gender' => 'required|in:Male,Female',
-                'occupation' => 'nullable|string',
-                'address' => 'nullable|string',
-                'phone' => 'nullable|numeric',
-                'complaint' => 'nullable|string',
+                'occupation' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'phone' => 'nullable|numeric|digits:9', // Ensure phone is exactly 9 digits
+                'complaint' => 'nullable|string|max:1000',
                 'medical_history' => 'nullable|array',
-                'medical_history.cardiac_disease' => 'nullable|string',
-                'medical_history.hypertension' => 'nullable|string',
-                'medical_history.diabetes' => 'nullable|string',
-                'medical_history.others' => 'nullable|string',
-                'dental_history' => 'nullable|string',
+                'medical_history.cardiac_disease' => 'nullable|in:Yes', // Ensure checkbox value is "Yes" if provided
+                'medical_history.hypertension' => 'nullable|in:Yes', // Ensure checkbox value is "Yes" if provided
+                'medical_history.diabetes' => 'nullable|in:Yes', // Ensure checkbox value is "Yes" if provided
+                'medical_history.others' => 'nullable|string|max:255',
+                'dental_history' => 'nullable|string|max:1000',
                 'pain_level' => 'nullable|in:mild,moderate,severe',
                 'dental_history_file.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048', // Allow images and documents
-            ], [
-                // Custom error messages
+            ];
+
+            // Custom error messages
+            $messages = [
                 'name.required' => 'The name field is required.',
                 'age.required' => 'The age field is required.',
                 'gender.required' => 'The gender field is required.',
-                'dental_history_file.*.mimes' => 'Only PDF, DOC, and DOCX files are allowed.',
+                'phone.digits' => 'The phone number must be exactly 9 digits.',
+                'dental_history_file.*.mimes' => 'Only PDF, DOC, DOCX, JPG, and PNG files are allowed.',
                 'dental_history_file.*.max' => 'File size must be less than 2MB.',
-            ]);
+            ];
+
+            // Validate the request
+            $validatedData = $request->validate($rules, $messages);
 
             // Define the default structure for medical_history
             $defaultMedicalHistory = [
@@ -79,11 +85,16 @@ class PatientController extends Controller
             // Redirect with success flash message
             return redirect()->route('home')->with('success', 'Medical history saved successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Redirect back with input and flash error message
+            dd($e);
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput()
                 ->with('error', 'There was an error saving the medical history. Please check the form and try again.');
+        } catch (\Exception $e) {
+            dd($e);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'An unexpected error occurred. Please try again.');
         }
     }
 }

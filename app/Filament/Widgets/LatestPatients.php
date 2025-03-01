@@ -10,19 +10,26 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class LatestPatients extends BaseWidget
 {
     protected int|string|array $columnSpan = 'full';
-        protected static ?int $sort=3;
+    protected static ?int $sort=4;
+    public static function canView(): bool
+    {
+       return auth()->check() && auth()->user()->hasRole(['student','instructor']);
+    }
+
     public function table(Table $table): Table
     {
         return $table
             ->query(
-                Patient::query()->orderBy('created_at', 'desc')
+                Patient::latest()
             )
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('age'),
                 Tables\Columns\TextColumn::make('gender'),
-                Tables\Columns\TextColumn::make('phone'),
+                Tables\Columns\TextColumn::make('phone')
+                ->searchable(),
                 Tables\Columns\TextColumn::make('address'),
                 Tables\Columns\TextColumn::make('pain_level')
                     ->badge(),

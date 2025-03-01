@@ -4,20 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Pages\ExaminationRecord;
 use App\Filament\Resources\PatientListResource\Pages;
-use App\Filament\Resources\PatientListResource\RelationManagers;
 use App\Models\Patient;
-use App\Models\Student;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Spatie\Permission\Models\Role;
 
 class PatientListResource extends Resource
 {
@@ -29,33 +24,62 @@ class PatientListResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name'),
-                TextInput::make('age'),
-                TextInput::make('gender'),
-                TextInput::make('phone'),
-                TextInput::make('address'),
+                TextInput::make('name')
+                    ->disabled(auth()->user()->hasRole(['instructor','admin'])),
+                TextInput::make('age')
+                    ->numeric()
+                    ->minValue(0) // Ensure age is not negative
+                    ->maxValue(120) // Set a reasonable maximum age
+                    ->required()
+                    ->disabled(auth()->user()->hasRole(['instructor','admin'])),
+                TextInput::make('gender')->disabled(auth()->user()->hasRole(['instructor','admin'])),
+                TextInput::make('phone')
+                    ->tel()
+                    ->length(9)
+                    ->required()
+                    ->disabled(auth()->user()->hasRole(['instructor','admin'])),
+                TextInput::make('address')->disabled(auth()->user()->hasRole(['instructor','admin'])),
                 Forms\Components\Select::make('pain_level')
+                    ->disabled(auth()->user()->hasRole(['instructor','admin']))
                 ->options(['mild','moderate','severe']),
-                Forms\Components\Textarea::make('complaint'),
-                Forms\Components\Textarea::make('dental_history'),
+                Forms\Components\Textarea::make('complaint')
+                    ->disabled(auth()->user()->hasRole(['instructor','admin'])),
+                Forms\Components\Textarea::make('dental_history')
+                    ->disabled(auth()->user()->hasRole(['instructor','admin'])),
                 Forms\Components\FileUpload::make('dental_history_file')
+                    ->disabled(auth()->user()->hasRole(['instructor','admin']))
                 ->multiple(),
                 Forms\Components\Select::make('user_id')
                     ->label('assign to')
-                ->options(User::where('type',2)->pluck('name', 'id'))
+                    ->disabled(auth()->user()->hasRole(['student','admin']))
+                ->options(User::where('type',1)->pluck('name', 'id'))
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                return $query->with('student')->where('status',0);
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->description(function ($record) {
+                        return $record->student->user->name??'';
+                    })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('age'),
                 Tables\Columns\TextColumn::make('gender'),
-                Tables\Columns\TextColumn::make('phone'),
+                Tables\Columns\TextColumn::make('phone')
+                ->searchable(),
                 Tables\Columns\TextColumn::make('address'),
+                Tables\Columns\TextColumn::make('status')
+                    ->formatStateUsing(function ($record, $state) {
+                      return  $state==0?"In Progress": "Done";
+                    })->color(function ($state) {
+
+                        return $state === 0 ? 'success' : 'warning';
+                    })->badge(),
                 Tables\Columns\TextColumn::make('pain_level')
                     ->badge(),
             ])
@@ -64,13 +88,15 @@ class PatientListResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+
                 Tables\Actions\Action::make('wizard')
-                    ->label('Start Wizard')
+                    ->label('Examination')
                     ->url(fn (Patient $record): string => ExaminationRecord::getUrl(['patient' => $record])),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->visible(auth()->user()->hasPermissionTo('delete_patient::list')),
                 ]),
             ]);
     }

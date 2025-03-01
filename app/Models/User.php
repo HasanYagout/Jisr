@@ -38,6 +38,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(Instructor::class, 'user_id');
     }
+
+
     const Type=[
         1=>'student',
         2=>'admin',

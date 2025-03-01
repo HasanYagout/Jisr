@@ -6,10 +6,13 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -56,9 +59,9 @@ class UserResource extends Resource
                         return $get('type') == 1; // Show only if type is '1'
                     })
                     ->options([
-                        '1' => 'Level 1',
-                        '2' => 'Level 2',
-                        '3' => 'Level 3',
+                        '1' => 'Level 3',
+                        '2' => 'Level 4',
+                        '3' => 'Level 5',
                     ])
                     ->required(function ($get) {
                         return $get('type') == 1; // Required only if type is '1'
@@ -73,9 +76,12 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('name')
+                ->sortable()
+                ->searchable(),
                 TextColumn::make('type')
                     ->formatStateUsing(function ($record, $state) {
+
                         return self::$model::Type[$state]; // Convert the type value to its label
                     })
                     ->color(function ($state) {
@@ -102,11 +108,18 @@ class UserResource extends Resource
                          return __($state);
                      })
                      ->translateLabel(),
+                Tables\Columns\ToggleColumn::make('status')
 
         ])
             ->filters([
-                //
-            ])
+                Tables\Filters\QueryBuilder::make()
+                ->constraints([
+                    SelectConstraint::make('type')
+                        ->options(self::$model::Type)
+                        ->multiple(),
+                    Tables\Filters\QueryBuilder\Constraints\BooleanConstraint::make('status')
+                ])->constraintPickerColumns(2)
+            ],layout: Tables\Enums\FiltersLayout::AboveContentCollapsible)
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

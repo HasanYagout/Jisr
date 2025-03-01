@@ -13,6 +13,8 @@ use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\View;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
@@ -38,6 +40,12 @@ class ExaminationRecord extends Page implements HasForms
     public ?array $data = [];
     protected static bool $shouldRegisterNavigation = false;
     public Patient $patient;
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasRole(['student', 'instructor']);
+    }
+
     public Examination $examination;
 
 
@@ -73,7 +81,7 @@ class ExaminationRecord extends Page implements HasForms
         // Face form data
         $faceForm = json_decode($this->patient->examination->face_form, true) ?? [];
         $medicalHistory = array_merge($defaultMedicalHistory, $medicalHistory);
-        $grade=json_decode($this->patient->examination->grade);
+        $grade = json_decode($this->patient->examination->grade);
 //        dd(json_decode($this->patient->medical_history, true));
 
         $this->form->fill([
@@ -94,7 +102,7 @@ class ExaminationRecord extends Page implements HasForms
             'dental_history_file' => $this->patient->dental_history_file,
             'problem_satisfaction_dentist' => json_decode($this->patient->examination->problem_satisfaction_dentist, true) ?? [],
             'problem_satisfaction_patient' => json_decode($this->patient->examination->problem_satisfaction_patient, true) ?? [],
-            'last_extraction'=>$this->patient->examination->last_extraction,
+            'last_extraction' => $this->patient->examination->last_extraction,
             'tmj' => $this->patient->examination->tmj,
             'soft_tissue_upper' => $this->patient->examination->soft_tissue_upper,
             'soft_tissue_lower' => $this->patient->examination->soft_tissue_period,
@@ -102,20 +110,20 @@ class ExaminationRecord extends Page implements HasForms
             'treatment_plan' => $this->patient->examination->treatment_plan,
             'diagnosis_classes' => $this->patient->examination->diagnosis_classes,
             'teeth' => $formattedTeethData,
-            'basic_information_grade'=>$grade->basic_information_grade,
-            'dental_history_grade'=>$grade->dental_history_grade,
-            'extra_examination_grade'=>$grade->extra_examination_grade,
-            'intra_examination_grade'=>$grade->intra_examination_grade,
-            'final_evaluation_diagnose'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_diagnose'] ?? [],
-            'final_evaluation_primary_impression'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_primary_impression'] ?? [],
-            'final_evaluation_border_molding'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_border_molding'] ?? [],
-            'final_evaluation_secondary_impression'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_secondary_impression'] ?? [],
-            'final_evaluation_designing'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_designing'] ?? [],
-            'final_evaluation_vertical_dimension'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_vertical_dimension'] ?? [],
-            'final_evaluation_centric_relation'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_centric_relation'] ?? [],
-            'final_evaluation_try_in'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_try_in'] ?? [],
-            'final_evaluation_insertion'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_insertion'] ?? [],
-            'final_evaluation_recall'=>json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_recall'] ?? [],
+            'basic_information_grade' => $grade->basic_information_grade??'',
+            'dental_history_grade' => $grade->dental_history_grade??'',
+            'extra_examination_grade' => $grade->extra_examination_grade??'',
+            'intra_examination_grade' => $grade->intra_examination_grade??'',
+            'final_evaluation_diagnose' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_diagnose'] ?? [],
+            'final_evaluation_primary_impression' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_primary_impression'] ?? [],
+            'final_evaluation_border_molding' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_border_molding'] ?? [],
+            'final_evaluation_secondary_impression' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_secondary_impression'] ?? [],
+            'final_evaluation_designing' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_designing'] ?? [],
+            'final_evaluation_vertical_dimension' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_vertical_dimension'] ?? [],
+            'final_evaluation_centric_relation' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_centric_relation'] ?? [],
+            'final_evaluation_try_in' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_try_in'] ?? [],
+            'final_evaluation_insertion' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_insertion'] ?? [],
+            'final_evaluation_recall' => json_decode($this->patient->examination->final_evaluation, true)['final_evaluation_recall'] ?? [],
         ]);
     }
 
@@ -131,32 +139,50 @@ class ExaminationRecord extends Page implements HasForms
                         ->schema([
                             TextInput::make('name')
                                 ->label('Patient Name')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->required(),
                             TextInput::make('age')
                                 ->numeric()
+                                ->minValue(0)
+                                ->maxValue(120)
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->required(),
                             TextInput::make('phone')
                                 ->tel()
+                                ->length(9)
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->required(),
                             TextInput::make('occupation')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->required(),
                             TextInput::make('address')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->required(),
                             Select::make('gender')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->options([
                                     'Male' => 'male',
                                     'Female' => 'female',
                                 ])
                                 ->required(),
                             CheckboxList::make('medical_history')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->label('Medical History')
                                 ->options([
                                     'cardiac_disease' => 'Cardiac Disease',
                                     'hypertension' => 'Hypertension',
                                     'diabetes' => 'Diabetes',
                                 ]),
-
                             TextInput::make('medical_history_others')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->label('Others')
                                 ->default(function () {
                                     // Decode the JSON data
@@ -166,16 +192,26 @@ class ExaminationRecord extends Page implements HasForms
                                     return $medicalHistory['others'] ?? '';
                                 }),
                             TextArea::make('complaint')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->columnSpan(2),
                             TextArea::make('dental_history')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->columnSpan(2),
                             Select::make('pain_level')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->options([
                                     'mild' => 'mild',
                                     'moderate' => 'moderate',
                                     'severe' => 'severe',
                                 ])
                                 ->columnSpan(2),
+                            ViewField::make('dental_history_file')
+                                ->label('Dental History Files')
+                                ->view('filament.views.uploaded-files')
+                                ->columnSpan(2)
                         ]),
 
                     // Step 2: Dental History
@@ -183,8 +219,13 @@ class ExaminationRecord extends Page implements HasForms
                         ->columns(2)
                         ->label('Dental History')
                         ->schema([
-                            TextInput::make('last_extraction'),
+                            TextInput::make('last_extraction')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                            ->dehydrated(),
+
                             CheckboxList::make('problem_satisfaction_patient')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->label('Problem and satisfaction for the existing prosthesis (Patient):')
                                 ->options([
                                     'retention' => 'Retention',
@@ -197,6 +238,8 @@ class ExaminationRecord extends Page implements HasForms
 
 
                             CheckboxList::make('problem_satisfaction_dentist')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->label('Problem and satisfaction for the existing prosthesis (Dentist):')
                                 ->options([
                                     'retention' => 'Retention',
@@ -215,6 +258,8 @@ class ExaminationRecord extends Page implements HasForms
                             Placeholder::make('examination_label')
                                 ->label('Extra-oral-examination:'),
                             CheckboxList::make('face_form')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->options([
                                     'square' => 'Square',
                                     'square_tapering' => 'Square Tapering',
@@ -227,6 +272,8 @@ class ExaminationRecord extends Page implements HasForms
                                 })
                                 ->columns(4),
                             CheckboxList::make('facial_profile')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->options([
                                     'class1' => 'Class 1',
                                     'class2' => 'Class 2',
@@ -234,6 +281,8 @@ class ExaminationRecord extends Page implements HasForms
                                 ])
                                 ->columns(4),
                             CheckboxList::make('facial_complexion')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->options([
                                     'dark' => 'Dark',
                                     'medium' => 'Medium',
@@ -241,6 +290,8 @@ class ExaminationRecord extends Page implements HasForms
                                 ])
                                 ->columns(4),
                             TextInput::make('tmj')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                ->dehydrated()
                                 ->label('TMJ'),
                         ]),
 
@@ -248,11 +299,21 @@ class ExaminationRecord extends Page implements HasForms
                         ->columns(2)
                         ->label('Intra-Examination')
                         ->schema([
-                            TextInput::make('soft_tissue_upper'),
-                            TextInput::make('soft_tissue_lower'),
-                            TextInput::make('soft_tissue_period'),
-                            Textarea::make('treatment_plan'),
-                            Textarea::make('diagnosis_classes'),
+                            TextInput::make('soft_tissue_upper')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                            ->dehydrated(),
+                            TextInput::make('soft_tissue_lower')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                            ->dehydrated(),
+                            TextInput::make('soft_tissue_period')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                            ->dehydrated(),
+                            Textarea::make('treatment_plan')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                            ->dehydrated(),
+                            Textarea::make('diagnosis_classes')
+                                ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                            ->dehydrated(),
                             Repeater::make('teeth')
                                 ->columnSpan(2) // Span across 2 columns in the parent grid
                                 ->label('Intra-Examination Details')
@@ -262,6 +323,8 @@ class ExaminationRecord extends Page implements HasForms
                                     ->schema([
                                         // Tooth Number and Condition in the same row
                                         TextInput::make('tooth_number')
+                                            ->disabled(auth()->user()->hasRole(['instructor', 'admin']))
+                                            ->dehydrated()
                                             ->label('Tooth Number')
                                             ->columnSpan(1) // Span 1 column in the 2-column grid
                                             ->required(),
@@ -300,17 +363,21 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_diagnose.value')
                                             ->label('Diagnosis')
                                             ->reactive()
-                                            ->columnSpan(1) // Ensure it takes 50% width
+                                            ->columnSpan(1)
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->extraAttributes(['class' => 'flex items-center justify-center']), // Center vertically and horizontally
                                         DateTimePicker::make('final_evaluation_diagnose.date')
                                             ->label('Date')
                                             ->hidden(fn($get) => !$get('final_evaluation_diagnose.value'))
-                                            ->formatStateUsing(function ($record,$state) {
-                                                if ($state){
+                                            ->formatStateUsing(function ($record, $state) {
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
                                             })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1) // Ensure it takes 50% width
                                             ->extraAttributes(['class' => 'flex items-center justify-center']), // Center vertically and horizontally
                                     ]),
@@ -321,13 +388,17 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_primary_impression.value')
                                             ->label('Primary Impression')
                                             ->reactive()
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_primary_impression.date')
                                             ->label('Date')
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->hidden(fn($get) => !$get('final_evaluation_primary_impression.value'))
                                             ->formatStateUsing(function ($state) {
-                                                if ($state){
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
@@ -342,13 +413,17 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_border_molding.value')
                                             ->label('Border Molding')
                                             ->reactive()
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_border_molding.date')
                                             ->label('Date')
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->hidden(fn($get) => !$get('final_evaluation_border_molding.value'))
                                             ->formatStateUsing(function ($state) {
-                                                if ($state){
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
@@ -363,17 +438,21 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_secondary_impression.value')
                                             ->label('Secondary Impression')
                                             ->reactive()
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_secondary_impression.date')
                                             ->label('Date')
                                             ->hidden(fn($get) => !$get('final_evaluation_secondary_impression.value'))
                                             ->formatStateUsing(function ($state) {
-                                                if ($state){
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
                                             })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                     ]),
@@ -383,16 +462,20 @@ class ExaminationRecord extends Page implements HasForms
                                             ->label('Designing')
                                             ->reactive()
                                             ->columnSpan(1)
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_designing.date')
                                             ->label('Date')
                                             ->hidden(fn($get) => !$get('final_evaluation_designing.value'))
                                             ->formatStateUsing(function ($state) {
-                                                if ($state){
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
                                             })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                     ]),
@@ -401,17 +484,21 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_vertical_dimension.value')
                                             ->label('Vertical Dimension')
                                             ->reactive()
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_vertical_dimension.date')
                                             ->label('Date')
                                             ->hidden(fn($get) => !$get('final_evaluation_vertical_dimension.value'))
                                             ->formatStateUsing(function ($state) {
-                                                if ($state){
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
                                             })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                     ]),
@@ -420,6 +507,8 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_centric_relation.value')
                                             ->label('Designing')
                                             ->reactive()
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_centric_relation.date')
@@ -428,6 +517,8 @@ class ExaminationRecord extends Page implements HasForms
                                             ->formatStateUsing(function () {
                                                 return now()->toDateTimeString();
                                             })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                     ]),
@@ -436,17 +527,21 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_try_in.value')
                                             ->label('Try In')
                                             ->reactive()
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_try_in.date')
                                             ->label('Date')
                                             ->hidden(fn($get) => !$get('final_evaluation_try_in.value'))
                                             ->formatStateUsing(function ($state) {
-                                                if ($state){
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
                                             })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                     ]),
@@ -455,17 +550,21 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_insertion.value')
                                             ->label('Insertion')
                                             ->reactive()
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_insertion.date')
                                             ->label('Date')
                                             ->hidden(fn($get) => !$get('final_evaluation_insertion.value'))
                                             ->formatStateUsing(function ($state) {
-                                                if ($state){
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
                                             })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
 
@@ -475,17 +574,21 @@ class ExaminationRecord extends Page implements HasForms
                                         Checkbox::make('final_evaluation_recall.value')
                                             ->label('Recall')
                                             ->reactive()
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                         DateTimePicker::make('final_evaluation_recall.date')
                                             ->label('Date')
                                             ->hidden(fn($get) => !$get('final_evaluation_recall.value'))
                                             ->formatStateUsing(function ($state) {
-                                                if ($state){
+                                                if ($state) {
                                                     return $state;
                                                 }
                                                 return now()->toDateTimeString();
                                             })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated()
                                             ->columnSpan(1)
                                             ->extraAttributes(['class' => 'flex items-center justify-center']),
                                     ]),
@@ -498,23 +601,37 @@ class ExaminationRecord extends Page implements HasForms
                                         ->schema([
                                             TextInput::make('basic_information_grade')
                                                 ->numeric()
-                                                ->disabled(fn($get) => !$this->areBasicInfoFieldsFilled($get)),
+                                                ->minValue(0)
+                                                ->maxValue(100)
+                                                ->disabled(fn($get) => !$this->areBasicInfoFieldsFilled($get) || auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated(),
+
                                             TextInput::make('dental_history_grade')
                                                 ->numeric()
-                                                ->disabled(fn($get) => !$this->areDentalHistoryFieldsFilled($get)),
+                                                ->minValue(0)
+                                                ->maxValue(100)
+                                                ->disabled(fn($get) => !$this->areDentalHistoryFieldsFilled($get) || auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated(),
 
                                             TextInput::make('extra_examination_grade')
                                                 ->numeric()
-                                                ->disabled(fn($get) => !$this->areExtraExaminationFieldsFilled($get)),
+                                                ->minValue(0)
+                                                ->maxValue(100)
+                                                ->disabled(fn($get) => !$this->areExtraExaminationFieldsFilled($get) || auth()->user()->hasRole(['student', 'admin']))
+                                            ->dehydrated(),
 
                                             TextInput::make('intra_examination_grade')
                                                 ->numeric()
-                                                ->disabled(fn($get) => !$this->areIntraExaminationFieldsFilled($get)),
+                                                ->minValue(0)
+                                                ->maxValue(100)
+                                                ->dehydrated()
+                                                ->disabled(fn($get) => !$this->areIntraExaminationFieldsFilled($get) || auth()->user()->hasRole(['student', 'admin'])),
                                         ]),
 
 
                                 ]),
                         ])
+                        ->visible()
 
 
                 ])
@@ -527,6 +644,7 @@ class ExaminationRecord extends Page implements HasForms
             ])
             ->statePath('data');
     }
+
     private function areBasicInfoFieldsFilled($get): bool
     {
         $requiredFields = ['name', 'age', 'phone', 'occupation', 'address', 'gender', 'medical_history', 'complaint', 'dental_history', 'pain_level'];
@@ -547,6 +665,7 @@ class ExaminationRecord extends Page implements HasForms
 
         return true; // All fields are filled and valid
     }
+
     private function areDentalHistoryFieldsFilled($get): bool
     {
         $requiredFields = ['last_extraction', 'problem_satisfaction_patient', 'problem_satisfaction_dentist'];
@@ -579,38 +698,48 @@ class ExaminationRecord extends Page implements HasForms
         }
         return true;
     }
+
     public function submit(): void
     {
         $data = $this->form->getState();
 
-//        // Define the required fields for each step
-//        $requiredFields = [
-//            'Basic Information' => ['name', 'age', 'phone', 'occupation', 'address', 'gender', 'medical_history', 'complaint', 'dental_history', 'pain_level'],
-//            'Dental History' => ['last_extraction', 'problem_satisfaction_patient', 'problem_satisfaction_dentist'],
-//            'Extra-Examination' => ['face_form', 'facial_profile', 'facial_complexion', 'tmj'],
-//            'Intra-Examination' => ['soft_tissue_upper', 'soft_tissue_lower', 'soft_tissue_period', 'treatment_plan', 'diagnosis_classes', 'teeth'],
-//            'Final Evaluation' => ['final_evaluation_diagnose', 'final_evaluation_primary_impression', 'final_evaluation_border_molding', 'final_evaluation_secondary_impression', 'final_evaluation_designing', 'final_evaluation_vertical_dimension', 'final_evaluation_try_in', 'final_evaluation_insertion', 'final_evaluation_recall'],
-//        ];
-//
-//        // Check if all required fields are filled
-//        $allFieldsFilled = true;
-//        foreach ($requiredFields as $step => $fields) {
-//            foreach ($fields as $field) {
-//                if (empty($data[$field])) {
-//                    $allFieldsFilled = false;
-//                    break 2; // Exit both loops if any field is empty
-//                }
-//            }
-//        }
-//
-//        if (!$allFieldsFilled) {
-//            Notification::make()
-//                ->danger()
-//                ->title('Error')
-//                ->body('Please fill all the required fields before submitting.')
-//                ->send();
-//            return;
-//        }
+
+        // Define required fields
+        $requiredFields = [
+            'name',
+            'age',
+            'phone',
+            'occupation',
+            'address',
+            'gender',
+            'medical_history',
+            'complaint',
+            'dental_history',
+            'pain_level',
+            'last_extraction',
+            'problem_satisfaction_patient',
+            'problem_satisfaction_dentist',
+            'face_form',
+            'facial_profile',
+            'facial_complexion',
+            'tmj',
+            'soft_tissue_upper',
+            'soft_tissue_lower',
+            'soft_tissue_period',
+            'treatment_plan',
+            'diagnosis_classes',
+            'teeth',
+        ];
+
+
+        // Check if all required fields are filled
+        $allFieldsFilled = true;
+        foreach ($requiredFields as $field) {
+            if (empty($data[$field])) {
+                $allFieldsFilled = false;
+                break;
+            }
+        }
 
         // Proceed with updating the grades and other data
         $grade = [
@@ -629,42 +758,16 @@ class ExaminationRecord extends Page implements HasForms
                 'value' => $data['final_evaluation_primary_impression']['value'] ?? false,
                 'date' => $data['final_evaluation_primary_impression']['value'] ? ($data['final_evaluation_primary_impression']['date'] ?? now()->toDateTimeString()) : null,
             ],
-            'final_evaluation_border_molding' => [
-                'value' => $data['final_evaluation_border_molding']['value'] ?? false,
-                'date' => $data['final_evaluation_border_molding']['value'] ? ($data['final_evaluation_border_molding']['date'] ?? now()->toDateTimeString()) : null,
-            ],
-            'final_evaluation_secondary_impression' => [
-                'value' => $data['final_evaluation_secondary_impression']['value'] ?? false,
-                'date' => $data['final_evaluation_secondary_impression']['value'] ? ($data['final_evaluation_secondary_impression']['date'] ?? now()->toDateTimeString()) : null,
-            ],
-            'final_evaluation_designing' => [
-                'value' => $data['final_evaluation_designing']['value'] ?? false,
-                'date' => $data['final_evaluation_designing']['value'] ? ($data['final_evaluation_designing']['date'] ?? now()->toDateTimeString()) : null,
-            ],
-            'final_evaluation_vertical_dimension' => [
-                'value' => $data['final_evaluation_vertical_dimension']['value'] ?? false,
-                'date' => $data['final_evaluation_vertical_dimension']['value'] ? ($data['final_evaluation_vertical_dimension']['date'] ?? now()->toDateTimeString()) : null,
-            ],
-            'final_evaluation_try_in' => [
-                'value' => $data['final_evaluation_try_in']['value'] ?? false,
-                'date' => $data['final_evaluation_try_in']['value'] ? ($data['final_evaluation_try_in']['date'] ?? now()->toDateTimeString()) : null,
-            ],
-            'final_evaluation_insertion' => [
-                'value' => $data['final_evaluation_insertion']['value'] ?? false,
-                'date' => $data['final_evaluation_insertion']['value'] ? ($data['final_evaluation_insertion']['date'] ?? now()->toDateTimeString()) : null,
-            ],
-            'final_evaluation_recall' => [
-                'value' => $data['final_evaluation_recall']['value'] ?? false,
-                'date' => $data['final_evaluation_recall']['value'] ? ($data['final_evaluation_recall']['date'] ?? now()->toDateTimeString()) : null,
-            ],
+            // Add other evaluation fields here...
         ];
-        $MedicalHistoryArray = [];  // Initialize an empty array to hold the formatted data
 
+        $MedicalHistoryArray = [];
         foreach ($data['medical_history'] as $key => $value) {
             $MedicalHistoryArray[$value] = $value;
         }
-        $MedicalHistoryArray['medical_history_others']=$data['medical_history_others'];
+        $MedicalHistoryArray['medical_history_others'] = $data['medical_history_others'];
 
+        // Update patient information
         $this->patient->update([
             'name' => $data['name'] ?? $this->patient->name,
             'age' => $data['age'] ?? $this->patient->age,
@@ -697,11 +800,17 @@ class ExaminationRecord extends Page implements HasForms
             'grade' => json_encode($grade) ?? null,
         ]);
 
+        // Update patient status if all required fields are filled
+        if ($allFieldsFilled) {
+            $this->patient->update(['status' => 1]);
+        }
+
         // Display a success message
         Notification::make()
             ->success()
             ->title('Success')
             ->body('Patient information updated successfully!')
             ->send();
-    }}
+    }
+}
 
