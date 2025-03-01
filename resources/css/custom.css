@@ -49,7 +49,7 @@
     backdrop-filter: blur(10px) !important;
     box-shadow: 0 22px 22px rgba(0, 0, 0, 0.1) !important;
     position: absolute;
-    top: 64%;
+    top: 60%;
     right: 24%;
     animation: float 3s infinite ease-in-out alternate; /* Different timing */
 }
