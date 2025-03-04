@@ -72,6 +72,7 @@
                                     <x-filament::badge color="gray">{{ "Dental History: $dentalHistoryGrade" }}</x-filament::badge>
                                     <x-filament::badge color="gray">{{ "Extra Exam: $extraExaminationGrade" }}</x-filament::badge>
                                     <x-filament::badge color="gray">{{ "Intra Exam: $intraExaminationGrade" }}</x-filament::badge>
+
                                 </div>
                             </div>
                         </div>
