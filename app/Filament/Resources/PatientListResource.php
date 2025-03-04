@@ -20,6 +20,13 @@ class PatientListResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getNavigationLabel(): string
+    {
+        return auth()->check() && auth()->user()->hasRole('student') ? 'My Patients' : 'Patient List';
+    }
+
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -60,10 +67,18 @@ class PatientListResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
+                $student=auth()->user()->hasRole(['student']);
+                if ($student) {
+
+                return $query->with('student')->where('user_id',auth()->id())->where('status',0);
+
+                }
                 return $query->with('student')->where('status',0);
+
             })
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->searchable()
                     ->description(function ($record) {
                         return $record->student->user->name??'';
                     })
@@ -84,15 +99,21 @@ class PatientListResource extends Resource
                     ->badge(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('gender')
+                ->options(['Male'=>'Male','Female'=>'Female']),
+                Tables\Filters\SelectFilter::make('pain_level')
+                    ->options(['Mild'=>'Mild','Moderate'=>'Moderate','Severe'=>'Severe']),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-
                 Tables\Actions\Action::make('wizard')
                     ->label('Examination')
                     ->url(fn (Patient $record): string => ExaminationRecord::getUrl(['patient' => $record])),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(function (Patient $record) {
+                        $record->examination->delete();
+                    })
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

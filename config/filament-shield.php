@@ -68,7 +68,7 @@ return [
         'enabled' => true,
 
         'pages' => [
-            'Dashboard',
+            'CustomDashboard',
         ],
 
         'widgets' => [

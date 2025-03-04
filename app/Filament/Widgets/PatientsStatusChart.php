@@ -19,12 +19,12 @@ class PatientsStatusChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Status 0 Patients', // Label for the first dataset
+                    'label' => 'In Progress', // Label for the first dataset
                     'data' => [$status0Count], // Data for status 0
                     'backgroundColor' => '#FF6384', // Color for status 0
                 ],
                 [
-                    'label' => 'Status 1 Patients', // Label for the second dataset
+                    'label' => 'Done', // Label for the second dataset
                     'data' => [$status1Count], // Data for status 1
                     'backgroundColor' => '#36A2EB', // Color for status 1
                 ],

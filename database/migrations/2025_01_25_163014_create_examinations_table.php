@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('facial_profile')->nullable();
             $table->text('facial_complexion')->nullable();
             $table->text('tmj')->nullable();
+            $table->text('teeth')->nullable();
             $table->timestamps();
         });
     }

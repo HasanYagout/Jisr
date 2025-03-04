@@ -20,7 +20,8 @@ class LatestPatients extends BaseWidget
     {
         return $table
             ->query(
-                Patient::latest()
+                auth()->user()->hasRole(['admin','instructor'])?   Patient::latest():Patient::where('user_id',auth()->id())->latest()
+
             )
             ->columns([
                 Tables\Columns\TextColumn::make('name')

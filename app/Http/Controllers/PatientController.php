@@ -85,13 +85,13 @@ class PatientController extends Controller
             // Redirect with success flash message
             return redirect()->route('home')->with('success', 'Medical history saved successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            dd($e);
+
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput()
                 ->with('error', 'There was an error saving the medical history. Please check the form and try again.');
         } catch (\Exception $e) {
-            dd($e);
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'An unexpected error occurred. Please try again.');

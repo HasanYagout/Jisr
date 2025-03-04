@@ -1,4 +1,6 @@
 <div class="grid grid-cols-2 gap-4">
+    @if($getState())
+
     @foreach(json_decode($getState()) as $state)
         <div class="col-span-1">
             @if (Str::endsWith($state, '.pdf'))
@@ -8,4 +10,5 @@
             @endif
         </div>
     @endforeach
+    @endif
 </div>
