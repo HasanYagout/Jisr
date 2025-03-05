@@ -7,6 +7,7 @@ use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -16,6 +17,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
@@ -32,6 +34,7 @@ class UserResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('email')
                     ->email()
+                    ->unique()
                     ->required(),
                 Forms\Components\Select::make('type')
                     ->options(User::Type)
@@ -40,13 +43,17 @@ class UserResource extends Resource
                         // Set the initial state of the type field
                         $component->state($state);
                     }),
-                Forms\Components\TextInput::make('student_id')
+                TextInput::make('student_id')
+                    ->unique(table: 'students', column: 'student_id') // Apply unique rule to the `students` table
                     ->visible(function ($get) {
                         return $get('type') == 1; // Show only if type is '1'
                     })
                     ->required(function ($get) {
                         return $get('type') == 1; // Required only if type is '1'
-                    }),
+                    })
+                    ->rules([
+                        Rule::unique('students', 'student_id')->whereNotNull('student_id'), // Custom unique rule
+                    ]),
                 Forms\Components\TextInput::make('subject')
                     ->visible(function ($get) {
                         return $get('type') == 3; // Show only if type is '3'

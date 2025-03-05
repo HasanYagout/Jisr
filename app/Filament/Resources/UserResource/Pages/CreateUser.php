@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
+use App\Models\Instructor;
 use App\Models\Student;
 use App\Models\User;
 use Filament\Actions;
@@ -17,20 +18,28 @@ class CreateUser extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        // Create the User
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make('password'), // Default password
             'type' => $data['type'],
         ]);
+        if ($data['type']==1){
+            // Create the Student associated with the User
+            Student::create([
+                'user_id' => $user->id,
+                'student_id' => $data['student_id'],
+                'level' => $data['level'],
+            ]);
+        }
+        elseif ($data['type']==3){
+            Instructor::create([
+                'user_id' => $user->id,
+                'subject'=>$data['subject'],
+            ]);
+        }
 
-        // Create the Student associated with the User
-        Student::create([
-            'user_id' => $user->id,
-            'student_id' => $data['student_id'],
-            'level' => $data['level'],
-        ]);
 
         // Assign the role to the user
         $role = Role::find($data['roles']); // Find the role by ID
