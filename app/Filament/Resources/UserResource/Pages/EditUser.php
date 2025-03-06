@@ -4,6 +4,8 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use Filament\Actions;
+use Filament\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,7 +36,25 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make()
+                ->requiresConfirmation()
+                ->action(function (Model $record) {
+                    if ($record->type == 1) {
+                        $record->student->delete();
+                    } elseif ($record->type == 3) {
+                        $record->instructor->delete();
+                        $record->delete();
+                    }
+                    else{
+                        $record->delete();
+
+                    }
+
+                    Notification::make()
+                        ->title('Record deleted successfully')
+                        ->success()
+                        ->send();
+                }),
         ];
     }
 

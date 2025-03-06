@@ -21,11 +21,6 @@ class PatientController extends Controller
                 'address' => 'nullable|string|max:255',
                 'phone' => 'nullable|numeric|digits:9', // Ensure phone is exactly 9 digits
                 'complaint' => 'nullable|string|max:1000',
-                'medical_history' => 'nullable|array',
-                'medical_history.cardiac_disease' => 'nullable|in:Yes', // Ensure checkbox value is "Yes" if provided
-                'medical_history.hypertension' => 'nullable|in:Yes', // Ensure checkbox value is "Yes" if provided
-                'medical_history.diabetes' => 'nullable|in:Yes', // Ensure checkbox value is "Yes" if provided
-                'medical_history.others' => 'nullable|string|max:255',
                 'dental_history' => 'nullable|string|max:1000',
                 'pain_level' => 'nullable|in:mild,moderate,severe',
                 'dental_history_file.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048', // Allow images and documents
