@@ -40,14 +40,19 @@ class EditUser extends EditRecord
                 ->requiresConfirmation()
                 ->action(function (Model $record) {
                     if ($record->type == 1) {
+                        if ($record->Student){
                         $record->student->delete();
+                        }
+                        $record->delete();
                     } elseif ($record->type == 3) {
+                        if ($record->instructor){
                         $record->instructor->delete();
+
+                        }
                         $record->delete();
                     }
                     else{
                         $record->delete();
-
                     }
 
                     Notification::make()

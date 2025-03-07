@@ -69,7 +69,7 @@ class PatientController extends Controller
                     $fileName = time() . '_' . $file->getClientOriginalName();
                     $file->storeAs('uploads', $fileName); // Save the file to the "uploads" directory
                     $filePaths = $fileName;
-                $validatedData['dental_history_file'] = $filePaths; // Store file paths as JSON
+                $validatedData['dental_history_file'] = 'uploads'.'/'.$filePaths; // Store file paths as JSON
             }
 
             // Save the data to the database
