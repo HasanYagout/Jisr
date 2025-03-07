@@ -31,7 +31,14 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->rules([
+                        'required',
+                        'alpha', // Ensures only letters are allowed
+                    ])
+                    ->validationMessages([
+                        'alpha' => 'The name field must contain only letters.',
+                    ]),
                 Forms\Components\TextInput::make('email')
                     ->email()
                     ->unique(ignoreRecord: true)

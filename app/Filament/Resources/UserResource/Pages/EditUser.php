@@ -44,21 +44,22 @@ class EditUser extends EditRecord
                         $record->student->delete();
                         }
                         $record->delete();
+
                     } elseif ($record->type == 3) {
                         if ($record->instructor){
                         $record->instructor->delete();
-
                         }
                         $record->delete();
                     }
                     else{
                         $record->delete();
                     }
-
                     Notification::make()
                         ->title('Record deleted successfully')
                         ->success()
                         ->send();
+                    return redirect()->route('filament.admin.resources.users.index');
+
                 }),
         ];
     }
