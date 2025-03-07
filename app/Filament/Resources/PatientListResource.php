@@ -54,14 +54,15 @@ class PatientListResource extends Resource
                 Forms\Components\Textarea::make('dental_history')
                     ->disabled(auth()->user()->hasRole(['instructor','admin'])),
                 Forms\Components\FileUpload::make('dental_history_file')
-                    ->disabled(auth()->user()->hasRole(['instructor','admin']))
-                ->multiple(),
+                    ->directory('uploads') // This line can be removed if you want to save directly to the root.
+                    ->acceptedFileTypes(['application/pdf']),
                 Forms\Components\Select::make('user_id')
                     ->label('assign to')
                     ->disabled(auth()->user()->hasRole(['student','admin']))
                 ->options(User::where('type',1)->pluck('name', 'id'))
             ]);
     }
+
 
     public static function table(Table $table): Table
     {

@@ -64,13 +64,12 @@ class PatientController extends Controller
 
             // Handle multiple file uploads
             if ($request->hasFile('dental_history_file')) {
-                $filePaths = [];
-                foreach ($request->file('dental_history_file') as $file) {
+
+               $file= $request->file('dental_history_file');
                     $fileName = time() . '_' . $file->getClientOriginalName();
                     $file->storeAs('uploads', $fileName); // Save the file to the "uploads" directory
-                    $filePaths[] = $fileName;
-                }
-                $validatedData['dental_history_file'] = json_encode($filePaths); // Store file paths as JSON
+                    $filePaths = $fileName;
+                $validatedData['dental_history_file'] = $filePaths; // Store file paths as JSON
             }
 
             // Save the data to the database

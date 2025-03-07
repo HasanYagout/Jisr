@@ -34,7 +34,7 @@ class UserResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('email')
                     ->email()
-                    ->unique()
+                    ->unique(ignoreRecord: true)
                     ->required(),
                 Forms\Components\Select::make('type')
                     ->options(User::Type)
@@ -44,7 +44,7 @@ class UserResource extends Resource
                         $component->state($state);
                     }),
                 TextInput::make('student_id')
-                    ->unique(table: 'students', column: 'student_id') // Apply unique rule to the `students` table
+                    ->unique(table: 'students', column: 'student_id',ignoreRecord: true) // Apply unique rule to the `students` table
                     ->visible(function ($get) {
                         return $get('type') == 1; // Show only if type is '1'
                     })

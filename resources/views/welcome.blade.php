@@ -138,7 +138,7 @@
                         <!-- File Upload Field -->
                         <div class="col-lg-6">
                             <label for="dental_history_file">If You Have a Dental History, Please Upload It:</label>
-                            <input type="file"   accept="application/pdf" class="form-control p-3" name="dental_history_file[]" multiple>
+                            <input type="file"   accept="application/pdf" class="form-control p-3" name="dental_history_file">
                             @error('dental_history_file.*')
                             <div class="text-danger">{{ $message }}</div>
                             @enderror
