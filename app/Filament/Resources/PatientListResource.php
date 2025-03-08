@@ -70,12 +70,10 @@ class PatientListResource extends Resource
             ->modifyQueryUsing(function (Builder $query) {
                 $student=auth()->user()->hasRole(['student']);
                 if ($student) {
-
                 return $query->with('student')->where('user_id',auth()->id())->where('status',0);
-
                 }
-                return $query->with('student')->where('status',0);
 
+                return $query->with('student')->where('status',0)->whereNull('user_id');
             })
             ->columns([
                 Tables\Columns\TextColumn::make('name')
@@ -107,9 +105,6 @@ class PatientListResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('wizard')
-                    ->label('Examination')
-                    ->url(fn (Patient $record): string => ExaminationRecord::getUrl(['patient' => $record])),
                 Tables\Actions\DeleteAction::make()
                     ->before(function (Patient $record) {
                         $record->examination->delete();
