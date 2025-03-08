@@ -60,9 +60,15 @@ class PatientListResource extends Resource
                 Forms\Components\Select::make('user_id')
                     ->label('assign to')
                     ->disabled(auth()->user()->hasRole(['student','admin']))
-                ->options(User::where('type',1)->whereHas('student',function ($query){
-                    $query->where('subject',auth()->user()->instructor->subject);
-                })->pluck('name', 'id')),
+                ->options(
+                    User::where('type',1)
+                    ->when(auth()->user()->hasRole(['instructor']),function (Builder $query){
+                        $query->whereHas('student',function ($query){
+                            $query->where('subject',auth()->user()->instructor->subject);
+                        });
+                    })
+                        ->pluck('name','id')
+                    ),
                 Select::make('diagnosis')
                 ->options(['Complete'=>'Complete','Partial'=>'Partial'])
             ]);
