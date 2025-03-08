@@ -26,6 +26,7 @@ class ApprovalResource extends Resource
     protected static ?string $navigationLabel = 'Approvals';
 
 
+
     public static function form(Form $form): Form
     {
         return $form
@@ -38,10 +39,15 @@ class ApprovalResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                return $query->whereNotNull('user_id')->where('status',0)->with('student')->whereHas('student', function (Builder $query) {
-                    $query->where('subject', auth()->user()->instructor->subject); // Filter by the authenticated user's subject
+                return $query->whereNotNull('user_id')
+                    ->where('status',0)
+                    ->with('student')
+                    ->where(auth()->user()->hasRole(['isntructor']),function (Builder $query){
+                        $query->whereHas('student',function (Builder $query){
+                            $query->where('subject', auth()->user()->instructor->subject); // Filter by the authenticated user's subject
 
-                });
+                        });
+                    });
             })
             ->columns([
                 Tables\Columns\TextColumn::make('name')

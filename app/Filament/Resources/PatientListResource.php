@@ -7,6 +7,7 @@ use App\Filament\Resources\PatientListResource\Pages;
 use App\Models\Patient;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -61,7 +62,9 @@ class PatientListResource extends Resource
                     ->disabled(auth()->user()->hasRole(['student','admin']))
                 ->options(User::where('type',1)->whereHas('student',function ($query){
                     $query->where('subject',auth()->user()->instructor->subject);
-                })->pluck('name', 'id'))
+                })->pluck('name', 'id')),
+                Select::make('diagnosis')
+                ->options(['Complete'=>'Complete','Partial'=>'Partial'])
             ]);
     }
 
