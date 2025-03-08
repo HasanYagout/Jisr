@@ -38,7 +38,7 @@ class ApprovalResource extends Resource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                return $query->whereNotNull('user_id')->with('student')->whereHas('student', function (Builder $query) {
+                return $query->whereNotNull('user_id')->where('status',0)->with('student')->whereHas('student', function (Builder $query) {
                     $query->where('subject', auth()->user()->instructor->subject); // Filter by the authenticated user's subject
 
                 });
