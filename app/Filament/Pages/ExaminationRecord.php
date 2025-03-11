@@ -647,7 +647,7 @@ class ExaminationRecord extends Page implements HasForms
 
     private function areBasicInfoFieldsFilled($get): bool
     {
-        $requiredFields = ['name', 'age', 'phone', 'occupation', 'address', 'gender', 'medical_history', 'complaint', 'dental_history', 'pain_level'];
+        $requiredFields = ['name', 'age', 'phone', 'occupation', 'address', 'gender', 'complaint', 'dental_history', 'pain_level'];
 
         foreach ($requiredFields as $field) {
             if (empty($get($field))) {
