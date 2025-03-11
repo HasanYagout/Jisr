@@ -602,28 +602,28 @@ class ExaminationRecord extends Page implements HasForms
                                             TextInput::make('basic_information_grade')
                                                 ->numeric()
                                                 ->minValue(0)
-                                                ->maxValue(100)
+                                                ->maxValue(10)
                                                 ->disabled(fn($get) => !$this->areBasicInfoFieldsFilled($get) || auth()->user()->hasRole(['student', 'admin']))
                                             ->dehydrated(),
 
                                             TextInput::make('dental_history_grade')
                                                 ->numeric()
                                                 ->minValue(0)
-                                                ->maxValue(100)
+                                                ->maxValue(10)
                                                 ->disabled(fn($get) => !$this->areDentalHistoryFieldsFilled($get) || auth()->user()->hasRole(['student', 'admin']))
                                             ->dehydrated(),
 
                                             TextInput::make('extra_examination_grade')
                                                 ->numeric()
                                                 ->minValue(0)
-                                                ->maxValue(100)
+                                                ->maxValue(10)
                                                 ->disabled(fn($get) => !$this->areExtraExaminationFieldsFilled($get) || auth()->user()->hasRole(['student', 'admin']))
                                             ->dehydrated(),
 
                                             TextInput::make('intra_examination_grade')
                                                 ->numeric()
                                                 ->minValue(0)
-                                                ->maxValue(100)
+                                                ->maxValue(10)
                                                 ->dehydrated()
                                                 ->disabled(fn($get) => !$this->areIntraExaminationFieldsFilled($get) || auth()->user()->hasRole(['student', 'admin'])),
                                         ]),

@@ -58,6 +58,7 @@ class PatientListResource extends Resource
                     ->directory('uploads') // This line can be removed if you want to save directly to the root.
                     ->acceptedFileTypes(['application/pdf']),
                 Forms\Components\Select::make('user_id')
+                    ->required()
                     ->label('assign to')
                     ->disabled(auth()->user()->hasRole(['student','admin']))
                 ->options(
@@ -70,6 +71,8 @@ class PatientListResource extends Resource
                         ->pluck('name','id')
                     ),
                 Select::make('diagnosis')
+                    ->required()
+                    ->hidden(auth()->user()->hasRole(['student','admin']))
                 ->options(['Complete'=>'Complete','Partial'=>'Partial'])
             ]);
     }
