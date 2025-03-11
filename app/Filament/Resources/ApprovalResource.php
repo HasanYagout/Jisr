@@ -38,6 +38,7 @@ class ApprovalResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
             ->modifyQueryUsing(function (Builder $query) {
                 return $query->whereNotNull('user_id')
                     ->where('status',0)

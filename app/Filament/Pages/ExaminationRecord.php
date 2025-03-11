@@ -703,45 +703,31 @@ class ExaminationRecord extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-
-        // Define required fields
+// Define required fields
         $requiredFields = [
-            'name',
-            'age',
-            'phone',
-            'occupation',
-            'address',
-            'gender',
-            'medical_history',
-            'complaint',
-            'dental_history',
-            'pain_level',
-            'last_extraction',
-            'problem_satisfaction_patient',
-            'problem_satisfaction_dentist',
-            'face_form',
-            'facial_profile',
-            'facial_complexion',
-            'tmj',
-            'soft_tissue_upper',
-            'soft_tissue_lower',
-            'soft_tissue_period',
-            'treatment_plan',
-            'diagnosis_classes',
-            'teeth',
+            'name', 'age', 'phone', 'occupation', 'address', 'gender', 'medical_history',
+            'complaint', 'dental_history', 'pain_level', 'last_extraction',
+            'problem_satisfaction_patient', 'problem_satisfaction_dentist', 'face_form',
+            'facial_profile', 'facial_complexion', 'tmj', 'soft_tissue_upper',
+            'soft_tissue_lower', 'soft_tissue_period', 'treatment_plan',
+            'diagnosis_classes', 'teeth', 'basic_information_grade','dental_history_grade','extra_examination_grade',
+            'intra_examination_grade', 'final_evaluation_diagnose','final_evaluation_primary_impression',
+            'final_evaluation_border_molding','final_evaluation_secondary_impression','final_evaluation_designing',
+            'final_evaluation_vertical_dimension','final_evaluation_centric_relation','final_evaluation_try_in',
+            'final_evaluation_insertion','final_evaluation_recall'
         ];
 
-
-        // Check if all required fields are filled
+// Check if all required fields are filled
         $allFieldsFilled = true;
         foreach ($requiredFields as $field) {
-            if (empty($data[$field])) {
+            if (empty($data[$field]) || (is_array($data[$field]) && empty(array_filter($data[$field])))) {
                 $allFieldsFilled = false;
                 break;
             }
+
         }
 
-        // Proceed with updating the grades and other data
+// Validate and format grades
         $grade = [
             'basic_information_grade' => $data['basic_information_grade'] ?? null,
             'dental_history_grade' => $data['dental_history_grade'] ?? null,
@@ -749,25 +735,29 @@ class ExaminationRecord extends Page implements HasForms
             'intra_examination_grade' => $data['intra_examination_grade'] ?? null,
         ];
 
+// Validate and format final evaluation
         $evaluation = [
             'final_evaluation_diagnose' => [
                 'value' => $data['final_evaluation_diagnose']['value'] ?? false,
-                'date' => $data['final_evaluation_diagnose']['value'] ? ($data['final_evaluation_diagnose']['date'] ?? now()->toDateTimeString()) : null,
+                'date' => ($data['final_evaluation_diagnose']['value'] ?? false) ? ($data['final_evaluation_diagnose']['date'] ?? now()->toDateTimeString()) : null,
             ],
             'final_evaluation_primary_impression' => [
                 'value' => $data['final_evaluation_primary_impression']['value'] ?? false,
-                'date' => $data['final_evaluation_primary_impression']['value'] ? ($data['final_evaluation_primary_impression']['date'] ?? now()->toDateTimeString()) : null,
+                'date' => ($data['final_evaluation_primary_impression']['value'] ?? false) ? ($data['final_evaluation_primary_impression']['date'] ?? now()->toDateTimeString()) : null,
             ],
-            // Add other evaluation fields here...
         ];
 
+// Validate and format teeth data
+        $teeth = !empty($data['teeth']) && is_array($data['teeth']) ? json_encode($data['teeth']) : null;
+
+// Convert medical history to a structured array
         $MedicalHistoryArray = [];
         foreach ($data['medical_history'] as $key => $value) {
             $MedicalHistoryArray[$value] = $value;
         }
-        $MedicalHistoryArray['medical_history_others'] = $data['medical_history_others'];
+        $MedicalHistoryArray['medical_history_others'] = $data['medical_history_others'] ?? null;
 
-        // Update patient information
+
         $this->patient->update([
             'name' => $data['name'] ?? $this->patient->name,
             'age' => $data['age'] ?? $this->patient->age,
@@ -775,15 +765,15 @@ class ExaminationRecord extends Page implements HasForms
             'occupation' => $data['occupation'] ?? $this->patient->occupation,
             'address' => $data['address'] ?? $this->patient->address,
             'gender' => $data['gender'] ?? $this->patient->gender,
-            'medical_history' => json_encode($MedicalHistoryArray ?? []),
+            'medical_history' => json_encode($MedicalHistoryArray),
             'complaint' => $data['complaint'] ?? $this->patient->complaint,
             'dental_history' => $data['dental_history'] ?? $this->patient->dental_history,
             'pain_level' => $data['pain_level'] ?? $this->patient->pain_level,
         ]);
 
-        // Update the examination record
+// Update the examination record
         $this->examination->update([
-            'last_extraction' => $data['last_extraction'],
+            'last_extraction' => $data['last_extraction'] ?? null,
             'problem_satisfaction_patient' => isset($data['problem_satisfaction_patient']) ? json_encode($data['problem_satisfaction_patient']) : null,
             'problem_satisfaction_dentist' => isset($data['problem_satisfaction_dentist']) ? json_encode($data['problem_satisfaction_dentist']) : null,
             'face_form' => isset($data['face_form']) ? json_encode($data['face_form']) : null,
@@ -795,15 +785,16 @@ class ExaminationRecord extends Page implements HasForms
             'soft_tissue_period' => $data['soft_tissue_period'] ?? null,
             'treatment_plan' => $data['treatment_plan'] ?? null,
             'diagnosis_classes' => $data['diagnosis_classes'] ?? null,
-            'teeth' => json_encode($data['teeth']) ?? null,
-            'final_evaluation' => json_encode($evaluation) ?? null,
-            'grade' => json_encode($grade) ?? null,
+            'teeth' => $teeth,
+            'final_evaluation' => json_encode($evaluation),
+            'grade' => json_encode($grade),
         ]);
 
-        // Update patient status if all required fields are filled
+
         if ($allFieldsFilled) {
             $this->patient->update(['status' => 1]);
         }
+
 
         // Display a success message
         Notification::make()
