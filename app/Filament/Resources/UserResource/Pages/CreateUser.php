@@ -26,10 +26,12 @@ class CreateUser extends CreateRecord
             'type' => $data['type'],
         ]);
         if ($data['type']==1){
-            // Create the Student associated with the User
+            $completionStatus = rand(0, 1) ? 'complete' : 'partial'; // Randomly choose between 'complete' and 'partial'
+
             Student::create([
                 'user_id' => $user->id,
                 'student_id' => $data['student_id'],
+                'subject' => $completionStatus,
                 'level' => $data['level'],
             ]);
         }
