@@ -88,7 +88,7 @@ class PatientController extends Controller
 
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'An unexpected error occurred. Please try again.');
+                ->with('error', $e->getMessage());
         }
     }
 }

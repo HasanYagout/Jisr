@@ -100,7 +100,7 @@ class PatientListResource extends Resource
                 Tables\Columns\TextColumn::make('address'),
                 Tables\Columns\TextColumn::make('status')
                     ->formatStateUsing(function ($record, $state) {
-                      return  $state==0?"In Progress": "Done";
+                      return  $state==0?"Not Assigned": "In Progress";
                     })->color(function ($state) {
 
                         return $state === 0 ? 'success' : 'warning';

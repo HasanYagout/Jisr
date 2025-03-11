@@ -22,7 +22,11 @@ class MedicalRecords extends Page
         $query = Examination::with('patient')
             ->whereHas('patient', function ($query) {
                 $query->where('status', 1); // Ensure patient status is 1
-            });
+            })
+            ->whereNotNull('grade->basic_information_grade') // Ensure basic_information_grade is not null
+            ->whereNotNull('grade->dental_history_grade')    // Ensure dental_history_grade is not null
+            ->whereNotNull('grade->extra_examination_grade') // Ensure extra_examination_grade is not null
+            ->whereNotNull('grade->intra_examination_grade'); // Ensure intra_examination_grade is not null
 
         // Role-based filtering
         if (auth()->user()->hasRole('instructor')) {

@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login(CustomLogin::class)
             ->sidebarCollapsibleOnDesktop()
+            ->brandName('JISR')
             ->colors([
                 'primary' => Color::Indigo,
                 'gray' => [
