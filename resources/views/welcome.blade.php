@@ -35,12 +35,17 @@
 
                         <!-- Age Field -->
                         <div class="col-lg-3">
-                            <label for="age">Age</label>
-                            <input class="form-control p-3" placeholder="Enter Your Age" type="number" name="age" value="{{ old('age') }}" min="0" max="120" required>
+                            <label for="age">Date of Birth</label>
+                            <input class="form-control p-3" type="date" name="age"
+                                   value="{{ old('age') }}"
+                                   min="{{ now()->subYears(100)->format('Y-m-d') }}"
+                                   max="{{ now()->format('Y-m-d') }}" required>
                             @error('age')
                             <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
+
+
 
                         <!-- Gender Field -->
                         <div class="col-lg-3">
