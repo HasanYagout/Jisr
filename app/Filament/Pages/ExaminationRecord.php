@@ -100,6 +100,7 @@ class ExaminationRecord extends Page implements HasForms
             'complaint' => $this->patient->complaint,
             'dental_history' => $this->patient->dental_history,
             'dental_history_file' => $this->patient->dental_history_file,
+            'notes' => $this->patient->notes,
             'problem_satisfaction_dentist' => json_decode($this->patient->examination->problem_satisfaction_dentist, true) ?? [],
             'problem_satisfaction_patient' => json_decode($this->patient->examination->problem_satisfaction_patient, true) ?? [],
             'last_extraction' => $this->patient->examination->last_extraction,
@@ -630,6 +631,22 @@ class ExaminationRecord extends Page implements HasForms
 
 
                                 ]),
+
+                            Card::make()
+                                ->schema([
+                                    Grid::make()
+                                        ->schema([
+                                            Textarea::make('notes')
+                                                ->formatStateUsing(function ($state) {
+                                                    return $state;
+                                                })
+                                            ->disabled(auth()->user()->hasRole(['student', 'admin']))
+
+
+                                        ]),
+
+
+                                ]),
                         ])
                         ->visible()
 
@@ -638,7 +655,7 @@ class ExaminationRecord extends Page implements HasForms
                     ->skippable()
                     ->submitAction(
                         \Filament\Forms\Components\Actions\Action::make('submit')
-                            ->label('Submit')
+                            ->label('Save form')
                             ->submit('submit')
                     ),
             ])
@@ -769,6 +786,7 @@ class ExaminationRecord extends Page implements HasForms
             'complaint' => $data['complaint'] ?? $this->patient->complaint,
             'dental_history' => $data['dental_history'] ?? $this->patient->dental_history,
             'pain_level' => $data['pain_level'] ?? $this->patient->pain_level,
+            'notes' => $data['notes'] ?? $this->patient->notes,
         ]);
 
 // Update the examination record
