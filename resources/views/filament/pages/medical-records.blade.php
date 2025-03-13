@@ -1,20 +1,20 @@
 <x-filament::page>
     <div class="p-6">
         <!-- Search Field -->
-        <div class="mb-6">
+        <div class="mb-5">
             <input
                 type="text"
                 wire:model.debounce.300ms="search"
-                placeholder="Search by name, phone, or address..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            placeholder="Search by name, phone, or address..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+            onchange="this.dispatchEvent(new InputEvent('input'))"
             />
         </div>
 
         <!-- Grid layout with responsive cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach ($records as $record)
-                <a href="{{ route('filament.admin.pages.examination-record', ['patient' => $record->patient_id]) }}"
-                   class="transition-transform transform hover:scale-105">
+
 
                     <!-- Card Container -->
                     <div class="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200 dark:border-gray-700">
@@ -77,7 +77,7 @@
                             </div>
                         </div>
                     </div>
-                </a>
+
             @endforeach
         </div>
 
