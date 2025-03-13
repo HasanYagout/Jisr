@@ -49,7 +49,7 @@ class PatientListResource extends Resource
                 TextInput::make('address')->disabled(auth()->user()->hasRole(['instructor','admin'])),
                 Forms\Components\Select::make('pain_level')
                     ->disabled(auth()->user()->hasRole(['instructor','admin']))
-                ->options(['mild','moderate','severe']),
+                ->options(['mild'=>'mild','moderate'=>'moderate','severe'=>'severe']),
                 Forms\Components\Textarea::make('complaint')
                     ->disabled(auth()->user()->hasRole(['instructor','admin'])),
                 Forms\Components\Textarea::make('dental_history')
@@ -119,7 +119,7 @@ class PatientListResource extends Resource
                 Tables\Filters\SelectFilter::make('gender')
                 ->options(['Male'=>'Male','Female'=>'Female']),
                 Tables\Filters\SelectFilter::make('pain_level')
-                    ->options(['Mild'=>'Mild','Moderate'=>'Moderate','Severe'=>'Severe']),
+                    ->options(['mild'=>'mild','moderate'=>'moderate','severe'=>'severe']),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

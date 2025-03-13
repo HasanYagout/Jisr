@@ -51,7 +51,8 @@ class UserResource extends Resource
                         $component->state($state);
                     }),
                 TextInput::make('student_id')
-                    ->unique(table: 'students', column: 'student_id',ignoreRecord: true) // Apply unique rule to the `students` table
+                    ->unique(table: 'students', column: 'student_id')
+                    ->hiddenOn('edit')
                     ->visible(function ($get) {
                         return $get('type') == 1; // Show only if type is '1'
                     })

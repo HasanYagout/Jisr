@@ -18,9 +18,11 @@ class EditUser extends EditRecord
         // Load the record being edited
         $record = $this->getRecord();
 
+
         // Load related data (e.g., Student or Instructor)
         $studentData = $record->type == 1 ? $record->student : null;
         $instructorData = $record->type == 3 ? $record->instructor : null;
+
 
         // Fill the form with the record's data
         $this->form->fill([
@@ -64,9 +66,12 @@ class EditUser extends EditRecord
         ];
     }
 
+
+
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        // Update the user record
+
+
         $record->update([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -77,20 +82,18 @@ class EditUser extends EditRecord
         if ($data['type'] == 1) {
             // Update or create student data
             $record->student()->updateOrCreate(
-                ['user_id' => $record->id],
+                ['user_id' => $record->id], // Use 'user_id' as the key
                 [
-                    'student_id' => $data['student_id'],
                     'level' => $data['level'],
                 ]
             );
 
+            // Delete instructor data if it exists
             $record->instructor()->delete();
-        } elseif ($data['type'] == 2) {
-
         } elseif ($data['type'] == 3) {
             // Update or create instructor data
             $record->instructor()->updateOrCreate(
-                ['user_id' => $record->id],
+                ['user_id' => $record->id], // Use 'user_id' as the key
                 [
                     'subject' => $data['subject'],
                 ]
@@ -101,5 +104,4 @@ class EditUser extends EditRecord
         }
 
         return $record;
-    }
-}
+    }}

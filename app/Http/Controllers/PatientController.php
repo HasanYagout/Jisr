@@ -59,15 +59,15 @@ class PatientController extends Controller
                 'others' => null,
             ];
 
-            // Merge medical history
-            $validatedData['medical_history'] = isset($validatedData['medical_history']) ?
-                array_merge($defaultMedicalHistory, $validatedData['medical_history']) :
+            $validatedData['medical_history'] = isset($request->all()['medical_history']) ?
+                array_merge($defaultMedicalHistory, $request->all()['medical_history']) :
                 $defaultMedicalHistory;
 
             // Encode medical history to JSON
             $validatedData['medical_history'] = json_encode(array_map(function ($value) {
                 return $value === '' || $value === null ? null : $value;
-            }, $validatedData['medical_history']));
+            }, $request->all()['medical_history']));
+
 
             // Handle file uploads
             if ($request->hasFile('dental_history_file')) {
