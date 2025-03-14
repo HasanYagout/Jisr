@@ -16,7 +16,9 @@
             @foreach ($records as $record)
 
 
-                    <!-- Card Container -->
+                    <a href="{{route('filament.admin.pages.medical-records-view',['patient'=>$record->patient->id])}}">
+
+
                     <div class="aspect-square bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200 dark:border-gray-700">
                         <div class="p-4 flex flex-col justify-between h-full">
                             <!-- Patient Name -->
@@ -77,7 +79,7 @@
                             </div>
                         </div>
                     </div>
-
+                    </a>
             @endforeach
         </div>
 
