@@ -506,7 +506,7 @@ class ExaminationRecord extends Page implements HasForms
                                     Grid::make(2) // Two columns for checkbox and date
                                     ->schema([
                                         Checkbox::make('final_evaluation_centric_relation.value')
-                                            ->label('Designing')
+                                            ->label('Centric relation')
                                             ->reactive()
                                             ->disabled(auth()->user()->hasRole(['student', 'admin']))
                                             ->dehydrated()
@@ -734,7 +734,7 @@ class ExaminationRecord extends Page implements HasForms
             'final_evaluation_insertion','final_evaluation_recall'
         ];
 
-// Check if all required fields are filled
+
         $allFieldsFilled = true;
         foreach ($requiredFields as $field) {
             if (empty($data[$field]) || (is_array($data[$field]) && empty(array_filter($data[$field])))) {
@@ -752,7 +752,7 @@ class ExaminationRecord extends Page implements HasForms
             'intra_examination_grade' => $data['intra_examination_grade'] ?? null,
         ];
 
-// Validate and format final evaluation
+
         $evaluation = [
             'final_evaluation_diagnose' => [
                 'value' => $data['final_evaluation_diagnose']['value'] ?? false,
@@ -762,6 +762,39 @@ class ExaminationRecord extends Page implements HasForms
                 'value' => $data['final_evaluation_primary_impression']['value'] ?? false,
                 'date' => ($data['final_evaluation_primary_impression']['value'] ?? false) ? ($data['final_evaluation_primary_impression']['date'] ?? now()->toDateTimeString()) : null,
             ],
+            'final_evaluation_border_molding' => [
+                'value' => $data['final_evaluation_border_molding']['value'] ?? false,
+                'date' => ($data['final_evaluation_border_molding']['value'] ?? false) ? ($data['final_evaluation_border_molding']['date'] ?? now()->toDateTimeString()) : null,
+            ],
+            'final_evaluation_secondary_impression' => [
+                'value' => $data['final_evaluation_secondary_impression']['value'] ?? false,
+                'date' => ($data['final_evaluation_secondary_impression']['value'] ?? false) ? ($data['final_evaluation_secondary_impression']['date'] ?? now()->toDateTimeString()) : null,
+            ],
+            'final_evaluation_designing' => [
+                'value' => $data['final_evaluation_designing']['value'] ?? false,
+                'date' => ($data['final_evaluation_designing']['value'] ?? false) ? ($data['final_evaluation_designing']['date'] ?? now()->toDateTimeString()) : null,
+            ],
+            'final_evaluation_vertical_dimension' => [
+                'value' => $data['final_evaluation_vertical_dimension']['value'] ?? false,
+                'date' => ($data['final_evaluation_vertical_dimension']['value'] ?? false) ? ($data['final_evaluation_vertical_dimension']['date'] ?? now()->toDateTimeString()) : null,
+            ],
+            'final_evaluation_centric_relation' => [
+                'value' => $data['final_evaluation_centric_relation']['value'] ?? false,
+                'date' => ($data['final_evaluation_centric_relation']['value'] ?? false) ? ($data['final_evaluation_centric_relation']['date'] ?? now()->toDateTimeString()) : null,
+            ],
+            'final_evaluation_try_in' => [
+                'value' => $data['final_evaluation_try_in']['value'] ?? false,
+                'date' => ($data['final_evaluation_try_in']['value'] ?? false) ? ($data['final_evaluation_try_in']['date'] ?? now()->toDateTimeString()) : null,
+            ],
+            'final_evaluation_insertion' => [
+                'value' => $data['final_evaluation_insertion']['value'] ?? false,
+                'date' => ($data['final_evaluation_insertion']['value'] ?? false) ? ($data['final_evaluation_insertion']['date'] ?? now()->toDateTimeString()) : null,
+            ],
+            'final_evaluation_recall' => [
+                'value' => $data['final_evaluation_recall']['value'] ?? false,
+                'date' => ($data['final_evaluation_recall']['value'] ?? false) ? ($data['final_evaluation_recall']['date'] ?? now()->toDateTimeString()) : null,
+            ],
+
         ];
 
 // Validate and format teeth data
