@@ -13,6 +13,12 @@
     }
 }
 
+@each $name, $color in $colors {
+    .text-#{$name} {
+        color: $color;
+    }
+}
+
 @each $key, $value in $custom-widths {
     .w-#{$key} {
         width: $value;
